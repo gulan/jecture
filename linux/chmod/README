@@ -1,0 +1,5 @@
+
+1. Generate empty files with all possible perms.
+2. Write a spec line for each file, given the name and perms.
+3. Write a verifier that checks files according to the spec.
+

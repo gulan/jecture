@@ -1,0 +1,11 @@
+GOAL
+----
+Write a testsuite of for the C standard library (clib) and for the
+standand Linux libraries. My goal is to refresh my C coding skills. I
+am *not* making a serious effort to write a professional quality
+testsuite.
+
+
+DATA SOURCES
+------------
+https://en.wikipedia.org/wiki/C_standard_library

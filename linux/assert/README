@@ -1,0 +1,10 @@
+
+Assert.h defines a single macro, assert(scalar). Any scalar value that
+can be case to 0 will cause the process to abort. Otherwise, then
+process continues.
+
+    cc assert.c -o assert ; ./assert ; echo $?
+
+If the macro NDEBUG is defined, no code is generated for the assert.
+
+    cc -DNDEBUG assert.c -o assert ; ./assert ; echo $?

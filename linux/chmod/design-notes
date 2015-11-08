@@ -1,0 +1,41 @@
+The makefile() procedure generates empty files with every possible
+permutation of permissions. It also writes a spec file which gives the
+specification for each file written. A subsequent procedure (verify)
+exists to compare the file's actual permissions with the expected
+permissions.
+
+The spec file is in JSON format, like so:
+
+{
+    "results": [
+        {"fname": "tfile-000", "octalMode": 0},
+    	{"fname": "tfile-001", "octalMode": 1},
+        ...
+	{"fname": "tfile-255", "octalMode": 377}
+    ]
+}
+
+It gives the expected permissions for each file written. Writing this
+file would be trivial, except the comma in JSON is a statement
+separator, and not a statement terminator. It is analogous to plus. We
+can write '1+2+3', but not '1+2+3+'. This detail makes the coding just
+difficult enough to demand a design before coding. The goal, as
+always, is to get the code right the first time, or else admit gross
+professional incompetence.
+
+The structure of the output file is
+
+             json = doc-begin + result-section + doc-end 
+        doc-begin = '{\n'
+   result-section = result-begin + result-body + result-end
+     result-begin = in4 + '"results": [\n'
+      result-body = first-result + remaining-results
+       result-end = '\n' + in4 + ']'
+     first-result = in8 + primary
+remaining-results = secondary*
+        secondary = ',\n' + in8 + primary
+          doc-end = '\n}\n'
+          primary = '{"fname": "tfile-%s", "octalMode": %o}'
+        secondary = ',\n' + in8 + primary
+              in4 = '    '
+              in8 = in4 + in4
