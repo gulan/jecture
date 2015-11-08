@@ -1,0 +1,14 @@
+
+  localtime: long -> struct tm
+
+Time() has a pointer arg. If not NULL, the current time will also be
+written there.  Time_t is an alias of long int.
+
+  time: -> time_t
+
+strftime() extracts fields from struct tm, coverts to a string
+representation, and writes that string value to the provided
+buffer. The reruned value is the number of bytes written including a
+final 0. A return of 0 *may* indicate an error.
+
+  strftime(buf, bufsize, templ, value ...) -> size_t
