@@ -176,12 +176,78 @@ def test_connect():
     # unexpected:
     assert cn.total_changes == 1
     cn.close()
-
     print 'test_connect ok'
+
+def test_11():
+    """
+    There is no explict commit. This will create a persistent table,
+    but the inserts are never committed.
+    """
+    cx = SQ.connect('counters.db')
+    c = cx.cursor()
+    c.execute('drop table if exists test_11;')
+    c.execute('create table test_11 (value integer);')
+    c.execute('insert into test_11 values (1);')
+    c.execute('select value from test_11')
+    assert c.fetchone()[0] == 1
+    cx.close()
+    print 'test_11 ok'
+
+def test_12():
+    """
+    Create a new table, and commit a value. On a fresh connection,
+    verify that the value persists.
+    """
+    cx = SQ.connect('counters.db')
+    c = cx.cursor()
+    c.execute('drop table if exists test_12;')
+    c.execute('create table test_12 (value integer);')
+    c.execute('insert into test_12 values (1);')
+    c.execute('select value from test_12')
+    assert c.fetchone()[0] == 1
+    cx.commit()
+    cx.close()
+    
+    cx = SQ.connect('counters.db')
+    c = cx.cursor()
+    c.execute('select value from test_12')
+    assert c.fetchone()[0] == 1
+    cx.close()
+    print 'test_12 ok'
+
+def test_13():
+    """
+    1. Create a new table, and commit a value.
+    2. On a new connection, increment the value and commit.
+    3. On another new connection, verify the increment persists.
+    """
+    cx = SQ.connect('counters.db')
+    c = cx.cursor()
+    c.execute('drop table if exists test_13;')
+    c.execute('create table test_13 (value integer);')
+    c.execute('insert into test_13 values (1);')
+    cx.commit()
+    cx.close()
+    
+    cx = SQ.connect('counters.db')
+    c = cx.cursor()
+    c.execute('update test_13 set value = (select value from test_13) + 1;')
+    cx.commit()
+    cx.close()
+    
+    cx = SQ.connect('counters.db')
+    c = cx.cursor()
+    c.execute('select value from test_13;')
+    assert c.fetchone()[0] == 2
+    cx.close()
+    print 'test_13 ok'
 
 if __name__ == '__main__':
     test_exceptions()
     test_connect()
+    test_11()
+    test_12()
+    test_13()
 
 # arraysize
 # close
