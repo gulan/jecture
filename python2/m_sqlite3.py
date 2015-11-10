@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+import multiprocessing
 import sqlite3 as SQ
 import sys
+import time
 
 def test_exceptions():
     try:
@@ -89,6 +91,7 @@ def test_connect():
     """
     
     print 'case 1'
+    # These number-strings are in the form 12.34.56
     print >>sys.stderr, 'sqlite3.version=%s' % SQ.version
     print >>sys.stderr, 'sqlite3.sqlite_version=%s' % SQ.sqlite_version
     # Same data split-out into integer tuples:
@@ -120,6 +123,7 @@ def test_connect():
     cn.close()
 
     print 'case 6'
+    # Do not use a connection object after it has been closed
     cn = SQ.connect(':memory:')
     cn.close()
     try:
@@ -173,7 +177,7 @@ def test_connect():
     c.execute('insert into ta values (17)')
     assert cn.total_changes == 1
     cn.rollback()
-    # unexpected:
+    # Unexpected:
     assert cn.total_changes == 1
     cn.close()
     print 'test_connect ok'
@@ -242,12 +246,118 @@ def test_13():
     cx.close()
     print 'test_13 ok'
 
+def test_14():
+    """
+    In process A,
+      1. Create a new table, and commit a value.
+
+    In Process B,
+      2. Wait for process A to commit
+      3. Query and verify the value
+    """
+
+    def A(pipe):
+        print "A 1"
+        cx = SQ.connect('counters.db')
+        c = cx.cursor()
+        c.execute('drop table if exists test_14;')
+        c.execute('create table test_14 (value integer);')
+        c.execute('insert into test_14 values (1);')
+        cx.commit()
+        cx.close()
+        pipe.send(''); pipe.recv() # sync point
+        print "A 2"
+        pipe.close()
+        print "A 3"
+
+    def B(pipe):
+        print "B 1"
+        pipe.recv(); pipe.send('') # sync point
+        print "B 2"
+        cx = SQ.connect('counters.db')
+        c = cx.cursor()
+        c.execute('select value from test_14;')
+        assert c.fetchone()[0] == 1
+        cx.close()
+        pipe.close()
+        print "B 3"
+        
+    print "M 1"
+    p1, p2 = multiprocessing.Pipe()
+    procA = multiprocessing.Process(target=A, args=(p1,))
+    procA.start()
+    print "M 2"
+    procB = multiprocessing.Process(target=B, args=(p2,))
+    procB.start()
+    print "M 3"
+    
+    procA.join()
+    print "M 4"
+    procB.join()
+    print 'test_14 ok'
+
+# def test_15(): FAIL. sqlite3 module has limitations. Switching to apsw.
+#     """
+#     In process Main,
+#       1. Create a new table, and commit a value.
+
+#     In Process A and B,
+#       1. Select the last inserted row
+#       2. Wait awhile
+#       3. Increment the value and insert a new row
+
+#     The values of the rows must be seen as successive increments.
+#     """
+    
+#     def AB(pid):
+#         for _ in range(10):
+#             cx = SQ.connect('counters.db')
+#             # isolation_level = 'IMMEDIATE')
+#             isolation_level = None
+#             c = cx.cursor()
+#             c.execute('begin;')
+#             c.execute('select value, max(seq) from test_15;')
+#             value = c.fetchone()[0]
+#             time.sleep(0.01)
+#             value += 1
+#             try:
+#                 c.execute('insert into test_15 (value) values (?);', (value,))
+#                 c.execute('commit;')
+#                 print 'value %s commmited by process %s' % (value, pid)
+#             except SQ.OperationalError:
+#                 # c.execute('rollback;')
+#                 print 'process %s abandoned %s' % (pid, value)
+#             # cx.commit()
+#             cx.close()
+
+#     print "M 1"
+#     cx = SQ.connect('counters.db')
+#     c = cx.cursor()
+#     c.execute('drop table if exists test_15;')
+#     c.execute('create table test_15 (seq integer primary key autoincrement, value integer);')
+#     c.execute('insert into test_15 (value) values (1);')
+#     cx.commit()
+#     cx.close()
+
+#     procA = multiprocessing.Process(target=AB, args=(1,))
+#     procA.start()
+#     print "M 2"
+#     procB = multiprocessing.Process(target=AB, args=(2,))
+#     procB.start()
+#     print "M 3"
+    
+#     procA.join()
+#     print "M 4"
+#     procB.join()
+#     print 'test_15 ok'
+
 if __name__ == '__main__':
     test_exceptions()
     test_connect()
     test_11()
     test_12()
     test_13()
+    test_14()
 
 # arraysize
 # close
