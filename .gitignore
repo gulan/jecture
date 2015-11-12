@@ -19,3 +19,4 @@ cabal.config
 cabal.sandbox.config
 dist
 my_*
+vm/
