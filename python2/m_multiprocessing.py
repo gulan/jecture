@@ -4,11 +4,12 @@ import multiprocessing as MP
 import os
 import sys
 import time
+import types
 
 # These first tests are cribbed from the python.org docs.
 
 def test_process_01():
-
+    # Simple
     def f(name):
         print 'hello', name
         
@@ -18,7 +19,7 @@ def test_process_01():
     print 'test_process_01 ok'
 
 def test_process_02():
-
+    # Showing process id
     def info(title):
         # Called in 2 different processes
         print `title`
@@ -36,7 +37,7 @@ def test_process_02():
     print 'test_process_02 ok'
 
 def test_process_03():
-
+    # With a queue
     def f(q):
         q.put([42, None, 'hello'])
 
@@ -80,7 +81,7 @@ def test_process_05():
     print 'test_process_05 ok'
 
 def test_process_06():
-
+    # Shared value
     def f(n):
         n.value = 3.1415927
 
@@ -92,7 +93,7 @@ def test_process_06():
     print 'test_process_06 ok'
 
 def test_process_07():
-
+    # Shared array
     def f(a):
         for i in range(len(a)):
             a[i] = -a[i]
@@ -105,7 +106,7 @@ def test_process_07():
     print 'test_process_07 ok'
 
 def test_process_08():
-
+    # Manage shares objects
     def f(d, l):
         d[1] = '1'
         d['2'] = 2
@@ -128,6 +129,7 @@ def f_for_test_process_09(x):
     return x*x
 
 def test_process_09():
+    # Pool Async
     pool = MP.Pool(processes=4)
     result = pool.apply_async(f_for_test_process_09, [10])
     val = result.get(timeout=1) # A race, but not likely to fail
@@ -138,6 +140,7 @@ def f_for_test_process_10(x):
     return x % 3
 
 def test_process_10():
+    # Pool Map
     pool = MP.Pool(processes=4)
     val = pool.map(f_for_test_process_10, range(10))
     assert val == [0, 1, 2, 0, 1, 2, 0, 1, 2, 0]
@@ -287,6 +290,76 @@ def test_process_13(N=3):
     he.join()
     print 'test_process_13 ok'
 
+def test_process_14():
+    # for i in dir(MP):
+    #     if i[0] == '_':
+    #         continue
+    #     print i, type(MP.__dict__[i])
+    
+    assert MP.SUBDEBUG == 5
+    assert MP.SUBWARNING == 25
+    
+    assert isinstance(MP.Array, types.FunctionType)
+    assert isinstance(MP.BoundedSemaphore, types.FunctionType)
+    assert isinstance(MP.Condition, types.FunctionType)
+    assert isinstance(MP.Event, types.FunctionType)
+    assert isinstance(MP.JoinableQueue, types.FunctionType)
+    assert isinstance(MP.Lock, types.FunctionType)
+    assert isinstance(MP.Manager, types.FunctionType)
+    assert isinstance(MP.Pipe, types.FunctionType)
+    assert isinstance(MP.Pool, types.FunctionType)
+    assert isinstance(MP.Queue, types.FunctionType)
+    assert isinstance(MP.RLock, types.FunctionType)
+    assert isinstance(MP.RawArray, types.FunctionType)
+    assert isinstance(MP.RawValue, types.FunctionType)
+    assert isinstance(MP.Semaphore, types.FunctionType)
+    assert isinstance(MP.Value, types.FunctionType)
+    assert isinstance(MP.active_children, types.FunctionType)
+    assert isinstance(MP.allow_connection_pickling, types.FunctionType)
+    assert isinstance(MP.cpu_count, types.FunctionType)
+    assert isinstance(MP.current_process, types.FunctionType)
+    assert isinstance(MP.freeze_support, types.FunctionType)
+    assert isinstance(MP.get_logger, types.FunctionType)
+    assert isinstance(MP.log_to_stderr, types.FunctionType)
+    
+    assert isinstance(MP.AuthenticationError, type)
+    assert isinstance(MP.BufferTooShort, type)
+    assert isinstance(MP.Process, type)
+    assert isinstance(MP.ProcessError, type)
+    assert isinstance(MP.TimeoutError, type)
+
+    print 'test_process_14 ok'
+
+def test_process_15():
+    # Process default args
+    p = MP.Process(                     # class constructor
+        group=None,                     # Always None
+        target=None,                    # Callable object
+        name=None,                      # Default is Process-N
+        args=(),                        # args to target
+        kwargs={}                       # kwargs to target.
+    )
+    # print `p.authkey`
+    assert p.daemon == False
+    assert p.exitcode == None
+    assert p.ident == None
+    assert p.is_alive() == False
+    assert isinstance(p.join, types.MethodType)
+    assert p.name.startswith('Process-')
+    assert p.pid == None
+    assert isinstance(p.run, types.MethodType)
+    assert isinstance(p.start, types.MethodType)
+    assert isinstance(p.terminate, types.MethodType)
+    p.start()
+    p.join()
+    assert p.daemon == False
+    assert p.exitcode == 0
+    assert p.ident != None
+    assert p.name.startswith('Process-')
+    assert p.pid != None
+    print 'test_process_15 ok'
+    
+
 if __name__ == '__main__':
     test_process_01()
     test_process_02()
@@ -301,4 +374,6 @@ if __name__ == '__main__':
     test_process_11()
     # 12 fails
     test_process_13()
+    test_process_14()
+    test_process_15()
 
