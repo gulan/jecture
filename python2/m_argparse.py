@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import multiprocessing
 import sys
 
 # need to capture io
@@ -120,12 +121,39 @@ def argparse_03():
     assert p.version == '1.2.3'
     print 'argparse_03 ok'
 
-# pa = p.parse_args()
+def argparse_04():
+    p = argparse.ArgumentParser()
+    ns = p.parse_args(
+        args=None,                      # default to sys.argv
+        namespace=None                  # default to new namespace
+    )
+    assert ns == argparse.Namespace()
+
+    ns = p.parse_args([])
+    assert ns == argparse.Namespace()
+    print ns
+
+    print 'argparse_04 ok'
+
+def argparse_05():
+    
+    def prog():
+        print 'starting prog'
+        p = argparse.ArgumentParser()
+        ns = p.parse_args(['a'])            # On error, exit the program!
+        print ns
+        
+    p = multiprocessing.Process(target=prog)
+    p.start()
+    print p.join()
+    print 'argparse_05 ok'
 
 if __name__ == '__main__':
     argparse_00()
     argparse_01()
     argparse_02()
     argparse_03()
+    argparse_04()
+    argparse_05()
 
 
