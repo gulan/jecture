@@ -221,10 +221,10 @@ def struct_02():
     # The string is truncated to declared length (1).
     assert v0[0][:1] == v1[0]
     
-    print_hex(p)
     print 'struct_02 ok'
 
-def examples():
+def struct_03():
+    # Pascal-style strings, means the string length is encoded
     F = ">21p" # 21 is the pad-to char count, which IS encoded.
     v0 = ("And so it begins ...",)
     p = pack(F,*v0)
@@ -233,7 +233,27 @@ def examples():
     # Hence, 21 to pack a string of length 20.
     v1 = unpack(F,p)
     assert v0 == v1
+    print_hex(p)
+    
+    # Len limit is 255.
+    # A string shorter than its declared length is padded-out to fit.
+    # A string longer than its declared length is truncated to fit.
+    print 'struct_03 ok'
+
+def struct_04():
+    # P - pack an integer pointer
+    # A pointer is an integer whose size depends of the computer's
+    # architecture. My system uses 64 bit pointers.
+    
+    p = pack('P', 0xffffffffffffffff)
+    assert unpack('P', p)[0] == 0xffffffffffffffff
+    
+    p = pack('P', 0x0)
+    assert unpack('P', p)[0] == 0x0
+    print 'struct_04 ok'
 
 if __name__ == '__main__':
     struct_01()
     struct_02()
+    struct_03()
+    struct_04()
