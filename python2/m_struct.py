@@ -4,9 +4,15 @@ import struct
 from struct import *
 import sys
 
+# TBD: Written to work on x86_64. I may adapt or add tests for the
+# Raspberry Pi 2.
+
 def print_hex(string, N=8):
+    """Print hex dump of string."""
+    
     def dot_fill(x):
         return x  +  '.' * (N - len(x))
+
     def gen():
         c = ''.join((" %s" % ch if ord(ch) > 32 else '--') for ch in string)
         h = ''.join("%.2x" % ord(ch) for ch in string)
@@ -16,6 +22,7 @@ def print_hex(string, N=8):
             yield (chead, hhead)
         if h:
             yield (c, dot_fill(h))
+
     pair_list = list(gen())
     chars = ' '.join(ch for (ch, _) in pair_list)
     hexs = ' '.join(x for (_, x) in pair_list)
@@ -233,7 +240,6 @@ def struct_03():
     # Hence, 21 to pack a string of length 20.
     v1 = unpack(F,p)
     assert v0 == v1
-    print_hex(p)
     
     # Len limit is 255.
     # A string shorter than its declared length is padded-out to fit.
