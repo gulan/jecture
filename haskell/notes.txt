@@ -1,0 +1,842 @@
+
+$ ghci
+Prelude> :set prompt "ghci> "
+ghci> -- denotes a comment extending to the end of the line.
+ghci> 3 -- three
+
+ghci> True && False == False
+ghci> True || False == True
+ghci> True && not False == False
+ghci> True && not False == True
+ghci> not (True && False) == True
+
+ghci> 2 + 15 == 17
+ghci> 15 * 2 == 30
+ghci> 15 - 2 == 13
+ghci> 15 / 2 == 7.5
+ghci> 15 `div` 7 == 2
+ghci> 15 `mod` 7 == 1
+ghci> 10 - 4 - 2 == (10 - 4) - 3
+ghci> 10 - (4 - 2) == 9
+ghci> 0 - (-3) == 3    -- distinct prefix and infix ops for -
+
+ghci> (5 /= 5) == not (5 == 5)
+
+XXXX> 5 == True     -- error, No instance for ...
+ghci> 5 == 5.0
+gchi> succ 2 == 3
+XXXX> succ succ 3   -- error
+ghci> succ (succ 3) == 5
+ghci> min 9 5
+ghci> min (min 9 5) 7 == min 9 (min 5 7)
+ghci> max 9 5 == 9
+ghci> succ 9 + max 5 4 + 1  ==  (succ 9) + (max 5 4) + 1
+ghci> pred (succ 6) == 6
+ghci> div 92 10 == 9
+ghci> div 92 10 == 92 `div` 10
+
+file mymath.hs:
+    |double x = x + x
+
+ghci> :l mymath
+ghci> double 3 == 6
+ghci> double 3.1 == 6.2
+ghci> double 0.0 == 0.0
+
+file mymath.hs:
+    |<as above>
+    |doubleSmallNumber x = if x > 100  
+    |                         then x  
+    |                         else x*2
+
+ghci> :l mymath -- could also just :reload
+ghci> doubleSmallNumber 100 == 200
+ghci> doubleSmallNumber 101 == 101
+ghci> (if True then "yes" else "no") == "yes"  -- 'if' is an expression
+
+-- Use let to bind a name in ghci; do not use in source file.
+ghci> let one = 1
+ghci> one + one == 2
+ghci> let one' = 1.0  -- ' is a valid identifier character
+ghci> one' + one' == 2.0
+ghci> (let x = 13 in x) + 6 == 19 -- let is an expression
+
+-- Lists
+ghci> 1:[] == [1]
+ghci> 1:(2:(3:[])) == [1,2,3]
+ghci> 1 : [2,3] == [1,2,3]
+ghci> [] ++ [1,2] == [1,2]
+ghci> [1,2] ++ [] == [1,2]
+ghci> [1,2] ++ [3] == [1,2,3]
+ghci> [1,2] /= [2,1]
+    > ['a',2]    -- list must be of uniform type
+    > [1,[2],3]  -- int and 'list of int' are different types
+ghci> [1]:([2]:[]) == [[1],[2]] -- may contain lists all of the same type.
+
+-- A string is really just list of characters
+ghci> 'a':"bc" == "abc"
+ghci> "abc" ++ "def" == "abcdef"
+
+ghci> "abcde" !! 0 == 'a'
+    > "abcde" !! 5 
+    > "abcde" !! (-1)
+ghci> ([3,4] > [3,2]) == True
+ghci> ([3,4,0] > [3,4]) == True
+ghci> head "abc" : tail "abc"  ==  "abc"
+ghci> tail [1] == []
+    > head []
+    > tail []
+    > init []
+    > last []
+ghci> init "abc" ++ [last "abc"] == "abc"
+ghci> length "abc" == 3
+ghci> length "" == 0
+ghci> length [] == 0
+ghci> null [] == True
+ghci> reverse "" == ""
+ghci> reverse "abc" == "cba"
+ghci> reverse (reverse [1,3,5]) == [1,3,5]
+
+-- take :: Int -> [a] -> [a]
+ghci> take 3 "abcdefgh" == "abc"
+ghci> take 0 "abcdefgh" == ""
+ghci> take 8 "abcdefgh" == "abcdefgh"
+ghci> take 99 "abcdefgh" == "abcdefgh"  -- why?
+ghci> take (-1) "abcdefgh" == ""
+ghci> take (-99) "abcdefgh" == ""
+
+-- drop :: Int -> [a] -> [a]
+ghci> drop 3 [8,4,2,1,5,6] == [1,5,6]
+ghci> drop 0 [8,4,2,1,5,6] == [8,4,2,1,5,6]
+ghci> drop (-99) [8,4,2,1,5,6] == [8,4,2,1,5,6]
+ghci> drop (7) [8,4,2,1,5,6] == []
+ghci> drop (99) [8,4,2,1,5,6] == []
+
+-- splitAt :: Int -> [a] -> ([a], [a])
+ghci> (let n = 0 in splitAt n "abcdefg") == ("","abcdefg")
+ghci> (let n = 3 in splitAt n "abcdefg") == ("abc","defg")
+ghci> (let n = 6 in splitAt n "abcdefg") == ("abcdef","g")
+ghci> (let n = 7 in splitAt n "abcdefg") == ("abcdefg","")
+
+ghci> dropWhile (< 'c') "abcabc" == "cabc"
+ghci> takeWhile (< 'c') "abcabc" == "ab"
+ghci> dropWhileEnd (== 'c') "ccabcaccbcccc" == "ccabcaccb"
+
+-- span p xs is equivalent to (takeWhile p xs, dropWhile p xs)
+-- span :: (a -> Bool) -> [a] -> ([a], [a])
+ghci> span (\_ -> True) "abcabc" == ("abcabc","")
+ghci> span (\_ -> False) "abcabc" == ("","abcabc")
+ghci> span (/= '|') "abc|abc|" == ("abc","|abc|")
+
+-- break p is equivalent to span (not . p).
+
+-- group :: Eq a => [a] -> [[a]]
+ghci> group "1112334445" == ["111","2","33","444","5"]
+ghci> group [] == []
+
+-- lookup :: Eq a => a -> [(a, b)] -> Maybe b
+ghci> lookup "April" [("March",31),("April",30),("May",31)] == Just 30
+ghci> lookup "July" [("March",31),("April",30),("May",31)] == Nothing
+ghci> lookup "February" [("February",28),("February",29)] == Just 28
+
+ghci> sum [8,4,2,9,1,6] == 30
+ghci> sum [] == 0
+ghci> sum [8,4,2,9,1,6] == sum [1,2,4,6,8,9]
+ghci> product [] == 1
+ghci> product [8,4,2,9,1,6] == 3456
+ghci> product [8,4,2,9,1,6] == product [1,2,4,6,8,9]
+ghci> maximum [8,4,2,9,1,6] == 9
+ghci> minimum [8,4,2,9,1,6] == 1
+    > maximum []
+    > minimum []
+ghci> 3 `elem` [1,2,3,4,5] 
+
+ghci> (3 `elem` [1,2,3,4,5]) == True
+ghci> (9 `elem` [1,2,3,4,5]) == False
+ghci> (9 `elem` []) == False
+
+ghci> [1..5] == [1,2,3,4,5]
+ghci> [1..1] == [1]
+ghci> [3..7] == [3,4,5,6,7]
+ghci> [7..3] == []
+ghci> [7,6..3] == [7,6,5,4,3]
+ghci> ['a'..'c'] == "abc"
+ghci> [2,4..10] == [2,4,6,8,10]
+ghci> [-1,0..4] == [-1,0,1,2,3,4]
+
+ghci> take 5 [1,3..] == [1,3,5,7,9]
+ghci> take 7 (cycle [1,2,3]) == [1,2,3,1,2,3,1]
+ghci> take 0 (cycle [1,2,3]) == []
+ghci> take 0 (cycle []) == []
+ghci> take 3 (repeat 17) == [17,17,17]
+
+ghci> replicate 3 17 == [17,17,17]
+ghci> :m +Data.List
+ghci> intersperse ',' "abcdbe" == "a,b,c,d,b,e"
+ghci> (concat $ intersperse " " ["Make","a","sentence."]) == "Make a sentence."
+ghci> intercalate " " ["Make","a","sentence."] == "Make a sentence."
+
+ghci> transpose [[1,2,3],[4,5,6]] == [[1,4],[2,5],[3,6]]
+ghci> (transpose . transpose) [[1,2,3],[4,5,6]] == [[1,2,3],[4,5,6]] 
+ghci> transpose [[]] == []
+ghci> transpose [] == []
+ghci> transpose [[1]] == [[1]]
+ghci> transpose [[1,2]] == [[1],[2]]
+
+ghci> subsequences "abc" == ["","a","b","ab","c","ac","bc","abc"]
+ghci> permutations "abc" == ["abc","bac","cba","bca","cab","acb"]
+ghci> :m +Data.Char
+ghci> map (\n -> [chr n]) [97..101] == ["a","b","c","d","e"]
+ghci> concatMap (\n -> [chr n]) [97..101] == "abcde"
+
+ghci> and [True,False,False] == False
+ghci> all (\n -> n < 0) [-1,0,10] == False
+ghci> all (\_ -> True) [-1,0,10] == True
+-- also, or/any
+
+ghci> isInfixOf  "cde" "abcdef" == True  -- also have  isPrefixOf, isSuffixOf 
+
+ghci> [x*2 | x <- [1..5]] == [2,4,6,8,10]
+ghci> [x*2 | x <- []] == []
+ghci> [x*2 | x <- [1..10],x>6] == [14,16,18,20]
+ghci> [(x,y) | x <- [3,6,2],y <- "ab"] == [(3,'a'),(3,'b'),(6,'a'),(6,'b'),(2,'a'),(2,'b')]
+ghci> [(x,y) | x <- [1,2,3],y <- [1,2,3],x<y] == [(1,2),(1,3),(2,3)]
+ghci> let length' xs = sum [1 | _ <- xs]
+
+ghci> let ss = ["abc","d","","ef"]
+ghci> [[ch | ch <- str] | str <- ss] == ss     -- identity
+ghci> [ch | str <- ss,ch <- str] == "abcdef"   -- flatten
+ghci> [[ch | ch <- reverse(str)] | str <- ss] == ["cba","d","","fe"]
+ghci> :m +Data.Char
+ghci> [[(chr . (+5) . ord) ch | ch <- str] | str <- ["","a","bc"]] == ["","f","gh"]
+
+ghci> inits "abc" == ["","a","ab","abc"]
+ghci> inits "" == [""]
+ghci> tails "abc" == ["abc","bc","c",""]
+ghci> stripPrefix "abc" "abcdef" == Just "def"
+ghci> stripPrefix "" "abcdef" == Just "abcdef"
+ghci> stripPrefix "abcdef" "abcdef" == Just ""
+ghci> stripPrefix "X" "abcdef" == Nothing
+
+-- Tuple
+-- data () = ()           -- same notation for type and value constructors
+-- data (,) a b = (,) a b
+-- data (,,) a b c = (,,) a b c
+ghci> :t ()           -- :: ()
+ghci> :t (,)          -- :: a -> b -> (a, b)
+ghci> :t (,,)         -- :: a -> b -> c -> (a, b, c)
+-- Tuples of different arities are different types.
+-- There is an empty tuple, but no singleton tuples.
+ghci> :k ()           -- :: *
+ghci> :k (,)          -- :: * -> * -> *
+ghci> :k ((,) Int)    -- :: * -> *
+ghci> :k (,,)         -- :: * -> * -> * -> *
+
+ghci> (("abc",123,False) == ("ab",13,True)) == False  -- mixed type OK
+    > ("abc",123,False) == ("abc",123) -- but types must match
+ghci> (fst (3,"xx"),snd(3,"xx")) == (3,"xx") -- only for pairs
+-- There is no reason for nor function to take the length of a tuple.
+
+
+ghci> zip [1..3] ['a'..'c'] == [(1,'a'),(2,'b'),(3,'c')]
+ghci> zip [] [] == []
+ghci> zip [] ['a'..'c'] == []
+ghci> zip [] ['a'..'c'] == zip [1..3] []
+ghci> zip [1..3] ['a'..] == [(1,'a'),(2,'b'),(3,'c')]
+ghci> zip3 [1] [2] [3] == [(1,2,3)]
+
+-- Types
+:t 'a'                 -- Char  
+:t True                -- Bool
+:t "ab cde"            -- [Char], which is the same as String
+:t ["abc",('z',False)] -- ([Char], (Char, [Bool]))
+
+ghci> ("a boy cat" :: String) == "a boy cat"
+ghci> ("a boy cat" :: String) == "a boy cat" :: Bool
+ghci> :t [[ch | ch <- str] | str <- ss] -- [String]
+ghci> :t [ch | str <- ss,ch <- str] -- String
+
+file mymath.hs:
+    |add3 :: Int -> Int -> Int -> Int
+    |add3 x y z = x + y + z
+
+:l mymath
+ghci> add3 11 22 33 == 66
+ghci> :t add3 11 22 33  -- :: Int
+ghci> :t add3 11 22     -- :: Int -> Int
+ghci> :t add3 11        -- :: Int -> Int -> Int
+ghci> :t add3           -- :: Int -> Int -> Int -> Int
+
+-- Int -> Int -> Int is parsed as Int -> (Int -> Int)
+-- The type on the far right is the final result of a function call.
+-- Int is a word-sized integer
+-- Integer is an arbitraily-sized integer.
+-- Float, Double
+ghci> :t head -- :: [a] -> a
+-- 'a' is a type variable. head is a polymorphic function.
+:t fst -- :: (a, b) -> a
+-- fst is polymorphic in two independent types.
+
+-- A typeclass is an interface
+:t (==) -- :: Eq a => a -> a -> Bool
+-- Eq is a typeclass.
+-- 'Eq a =>' means that 'a' is a type variable that has the operations of Eq implemented.
+-- 'Eq a =>' is called a class constraint.
+-- Eq implements == and /=
+-- :i Eq
+
+   |class Eq a => Ord a where
+   |  compare :: a -> a -> Ordering
+   |  (<) :: a -> a -> Bool
+   |  (>=) :: a -> a -> Bool
+   |  (>) :: a -> a -> Bool
+   |  (<=) :: a -> a -> Bool
+   |  max :: a -> a -> a
+   |  min :: a -> a -> a
+
+-- From above, an Ord type must already be a Eq type. Ord is a subclass of Eq.
+-- Show,Read,Enum,Bounded
+
+ghci> (read "17" :: Int) == 17
+ghci> (read "17" :: Float) == 17.0
+ghci> read "17" + 2.0 == 19.0 -- inferred
+
+ghci> :i Enum
+   |class Enum a where
+   |  succ :: a -> a
+   |  pred :: a -> a
+   |  toEnum :: Int -> a
+   |  fromEnum :: a -> Int
+   |  enumFrom :: a -> [a]
+   |  enumFromThen :: a -> a -> [a]
+   |  enumFromTo :: a -> a -> [a]
+   |  enumFromThenTo :: a -> a -> a -> [a]
+
+ghci> succ 2.5 == 3.5 -- strange to define on floats
+ghci> toEnum(0) :: Bool == False
+    > toEnum(2) :: Bool -- bad argument
+ghci> (toEnum(66) :: Char) == 'B'
+ghci> fromEnum('B') == 66 -- inferred
+ghci> take 5 (enumFrom 's') == "stuvw"
+ghci> enumFromTo 'c' 'k' == ['c'..'k']
+-- note that we have both fromEnum and enumFrom
+-- remember that enumFrom* functions return a list
+ghci> (fromEnum () :: Int) == 0
+ghci> (toEnum 0 :: ()) == ()
+
+ghci> :i Bounded
+   |class Bounded a where
+   |  minBound :: a
+   |  maxBound :: a
+
+ghci> (minBound :: Int) == -9223372036854775808 -- 64 bit machine
+ghci> (maxBound :: Char) == '\1114111'
+ghci> (minBound :: Bool) < True
+
+ghci> :i Num
+   |class Num a where
+   |  (+) :: a -> a -> a
+   |  (*) :: a -> a -> a
+   |  (-) :: a -> a -> a
+   |  negate :: a -> a
+   |  abs :: a -> a
+   |  signum :: a -> a
+   |  fromInteger :: Integer -> a
+   |  	      -- Defined in `GHC.Num'
+   |instance Num Integer -- Defined in `GHC.Num'
+   |instance Num Int -- Defined in `GHC.Num'
+   |instance Num Float -- Defined in `GHC.Float'
+   |instance Num Double -- Defined in `GHC.Float'
+
+ghci> :i Integral
+   |class (Real a, Enum a) => Integral a where
+   |  quot :: a -> a -> a
+   |  rem :: a -> a -> a
+   |  div :: a -> a -> a
+   |  mod :: a -> a -> a
+   |  quotRem :: a -> a -> (a, a)
+   |  divMod :: a -> a -> (a, a)
+   |  toInteger :: a -> Integer
+   |  	    -- Defined in `GHC.Real'
+   |instance Integral Integer -- Defined in `GHC.Real'
+   |instance Integral Int -- Defined in `GHC.Real'
+
+ghci> :i Floating
+   |class Fractional a => Floating a where
+   |  pi :: a
+   |  exp :: a -> a
+   |  sqrt :: a -> a
+   |  log :: a -> a
+   |  (**) :: a -> a -> a
+   |  logBase :: a -> a -> a
+   |  sin :: a -> a
+   |  tan :: a -> a
+   |  cos :: a -> a
+   |  asin :: a -> a
+   |  atan :: a -> a
+   |  acos :: a -> a
+   |  sinh :: a -> a
+   |  tanh :: a -> a
+   |  cosh :: a -> a
+   |  asinh :: a -> a
+   |  atanh :: a -> a
+   |  acosh :: a -> a
+   |  	-- Defined in `GHC.Float'
+   |instance Floating Float -- Defined in `GHC.Float'
+   |instance Floating Double -- Defined in `GHC.Float'
+
+ghci> fromIntegral(length "abc") + pi == 6.141592653589793
+
+file:
+   |roll 1 = "One"
+   |roll 2 = "Two"
+   |roll 3 = "Three"
+   |roll 4 = "Four"
+   |roll 5 = "Five"
+   |roll 6 = "Six"
+   |roll _ = "Invalid"
+
+ghci> roll 3 == "Three"
+ghci> roll 31 == "Invalid"
+ghci> :t roll   -- roll :: (Eq a, Num a) => a -> [Char]
+
+file:
+   |roll :: Int -> String
+   |roll 1 = "One"
+   |roll 2 = "Two"
+   |roll 3 = "Three"
+   |roll 4 = "Four"
+   |roll 5 = "Five"
+   |roll 6 = "Six"
+   |roll _ = "Invalid"
+
+ghci> :r
+ghci> :t roll   -- roll :: Int -> String
+-- Could also use  roll :: (Integral a) => a -> String
+-- Which would allow both Int and Integer arguments.
+
+-- <more pattern matching>
+
+-- The infix construct in list must be grouped:
+-- head' (x:_) = x
+
+ghci> error "xxx" -- Throws exception
+
+-- patterns are evaluated in sequential order
+
+-- all@(x:xs) means all == (x:xs)
+-- [a ++ b] is not a pattern: no unique decomposition
+
+file:
+   |roll2 :: Int -> String
+   |roll n
+   |n == 1 = "One"
+   |n == 1 = "Two"
+   |n == 3 = "Three"
+   |n == 4 = "Four"
+   |n == 5 = "Five"
+   |n == 6 = "Six"
+   |n < 1 or n > 6 = "Invalid"
+
+
+file:
+   |roll2 :: Int -> String
+   |roll2 n
+   |    | n == 1 = "One"
+   |    | n == 2 = "Two"
+   |    | n == 3 = "Three"
+   |    | n == 4 = "Four"
+   |    | n == 5 = "Five"
+   |    | n == 6 = "Six"
+   |    | n < 1 = "Too Small"
+   |    | otherwise = "Too Big"
+
+-- <where>
+-- <let>
+-- <case>
+-- <recursion>
+-- <curried function and partial application>
+-- <sections>
+-- <higher-order functions>
+
+-- f :: x -> x -> x -> y -- take 3 x's and return a y.
+-- x -> x -> x -> y  ==  x -> (x -> (x -> y))
+-- g :: (x -> x) -> x -> y  -- the first arg is a function
+ghci> :t (+)                        -- (+) :: Num a => a -> a -> a
+ghci> :t (+) :: Int -> Int -> Int   -- (+) :: Int -> Int -> Int
+
+ghci> :t zipWith                             -- :: (a -> b -> c) -> [a] -> [b] -> [c]
+ghci> :t zipWith (+)                         -- :: Num c => [c] -> [c] -> [c]
+ghci> :t zipWith ((+) :: Int -> Int -> Int)  -- :: [Int] -> [Int] -> [Int]
+ghci> :t zipWith (+) [1]                     -- :: Num c => [c] -> [c]
+ghci> :t zipWith (+) [1] [2]                 -- :: Num c => [c]
+ghci> :t zipWith (+) ([1] :: [Int])          -- :: [Int] -> [Int]
+ghci> :t zipWith (+) ([1] :: [Int]) [2]      -- :: [Int]
+ghci> zipWith (+) [1,2,3,4] [2,4,8,16] == [3,6,11,20]
+-- map :: (a -> b) -> [a] -> [b]
+-- filter :: (a -> Bool) -> [a] -> [a]
+
+ghci> map (2^) [16..20] == [65536,131072,262144,524288,1048576]
+ghci> (\x -> 2*x + 1) 3 == 7
+ghci> (\x y -> 2*x + y) 3 6 == 12
+ghci> map (\(a,b) -> a + b) [(1,2),(3,5)] == [3,8] -- tuple arg
+
+ghci> foldl (+) 0 [1,1,1,1,1] == 5
+ghci> foldl (+) 0 [1,(-1),2,(-2)] == 0
+ghci> foldl (+) 0 [1,2,3,4] == 10
+ghci> foldl (+) 0 [] == 0
+
+ghci> let fp = foldl (+) 0 -- 0 is the identity of addition
+  fp []
+==
+  0
+-- ----
+
+  fp [1,2,3]
+==
+   fp [0+1,2,3]
+==
+   fp [0+1+2,3]
+==
+   fp [0+1+2+3]
+==
+   6
+
+ghci> (  tail (tail [1..6])  )  ==  (  tail $ tail [1..6]  )
+
+ghci> tail (tail [1..6]) == (tail . tail) [1..6] -- compose
+
+-- no namespace qualification:
+-- import Data.List
+-- import Data.List (nub, sort)
+-- import Data.List hiding (nub)
+ 
+-- import qualified Data.Map
+ghci> :t Data.Map.filter
+
+ghci> import qualified Data.Map as M
+ghci> :t M.filter
+M.filter :: (a -> Bool) -> Data.Map.Map k a -> Data.Map.Map k a
+
+   |https://downloads.haskell.org/~ghc/latest/docs/html/libraries/
+   |https://www.haskell.org/hoogle/
+
+ghci> :m + Data.List
+ghci> :i nub -- nub :: Eq a => [a] -> [a]  -- Defined in `Data.List'
+
+ghci> Data.List.intersperse '.' "abc" == "a.b.c"
+ghci> Data.List.intersperse 0 [1..5] == [1,0,2,0,3,0,4,0,5]
+ghci> concat ["a","bee","hive"] == "abeehive"
+
+-- <Data.Set>
+
+MyModule.hs:
+    |module MyModule (abc, def, ghi) where
+
+-- Definitions not in the export list are private to the module.
+Geometry/Sphere.hs:
+   |module Geometry.Sphere ...
+Geometry/Cube.hs:
+   |module Geometry.Cube ...
+
+import qualified Geometry.Cube as Cube  -- for when names clash 
+
+-- ADT
+data Bool = False | True
+data Shape = Circle Float Float Float | Rectangle Float Float Float Float
+-- Defines type constructor functions:
+
+Circle :: Float -> Float -> Float -> Shape
+Rectangle :: Float -> Float -> Float -> Float -> Shape
+
+-- ok for type constructor and value constructor to have same the name
+data Point = Point Float Float
+
+-- function on an ADT may be defined using pattern matching on the construtor
+area :: Shape -> Float
+area (Circle _ _ r) = ...
+area (Rectangle x1 y1 x2 y2) = ...
+
+data X = ... deriving (Show)
+
+   |module Shapes   
+   |( Point(..)  
+   |, Shape(..)
+   |, area  
+   |more names...
+   |) where
+
+The notation Point(..) means export all the Point
+constructors. Clients may then use pattern matching of the
+constructor. Sometimes, we do not export the constructors, because we
+want to hide the implementation of the type.
+
+-- Records
+data Person = Person { firstName :: String  
+                     , lastName :: String  
+                     , age :: Int  
+                     , height :: Float  
+                     , phoneNumber :: String  
+                     , flavor :: String  
+                     } deriving (Show)   
+is the same type as
+data Person = Person String String Int Float String String deriving (Show)   
+
+The record definition automatically create selector functions:
+firstName :: Person -> String
+firstName (Person first _ _ _ _ _) = first
+This feature saves use from writing a lot of boilerplate. We can also do,
+
+let p = Person {firstName="Bob", age=33, ...}
+
+The names appear once for each field, in any order. Default values?
+
+data Maybe a = Nothing | Just a -- 'a' is a type parameter
+
+ghci> :t Just "abc" -- Just "abc" :: Maybe [Char]
+ghci> :t Just 1.0 -- Just 1.0 :: Fractional a => Maybe a
+ghci> :t Just (1.0 :: Float) -- Just (1.0 :: Float) :: Maybe Float
+ghci> :t Just 1.0 :: Maybe Double --Just 1.0 :: Maybe Double :: Maybe Double
+
+-- Never add typeclass constraints to data declarations
+
+    > read "Just 't'" :: Maybe a, 
+ghci> read "Just 't'" :: Maybe Char
+
+-- Order of constructors implictly defines order of values:
+data T = A | Z | B deriving (Ord)
+A < Z and Z < B
+
+ghci> Nothing < Just "any Ord type"
+
+data Day = Monday 
+           | Tuesday | Wednesday 
+           | Thursday | Friday | Saturday | Sunday   
+           deriving (Eq, Ord, Show, Read, Bounded, Enum)  
+
+ghci> (minBound :: Day) -- Monday
+ghci> succ Monday == Tuesday
+ghci> let weekEnd = [Saturday .. Sunday]
+
+type String = [Char] -- alias type expression
+type AssocList k v = [(k,v)] -- alias with type parameters
+
+data List a = Empty | Cons a (List a) -- recursive
+infixr 5 :-:  -- right associtive
+data List a = Empty | a :-: (List a) deriving (Show, Read, Eq, Ord)  
+ghci> :i (+)
+class Num a where
+  (+) :: a -> a -> a
+  ...
+	-- Defined in `GHC.Num'
+infixl 6 +  <---------------
+
+class Eq a where  
+    (==) :: a -> a -> Bool  
+    (/=) :: a -> a -> Bool  
+    x == y = not (x /= y)  
+    x /= y = not (x == y)  
+
+Because of recursive default definitions, we only need to implement either == or /= in an instance. It OK to implement both.
+
+instance Eq TrafficLight where  
+    Red == Red = True  
+    Green == Green = True  
+    Yellow == Yellow = True  
+    _ == _ = False  
+
+instance Show TrafficLight where  
+    show Red = "Red light"  
+    show Yellow = "Yellow light"  
+    show Green = "Green light"  
+
+Typeclass Num is a subclass of Eq. That means that no type may be an instance of Num unless it is already an instance of Eq.
+
+class (Eq a) => Num a where  
+   ...    
+
+Maybe is not by itself a concrete type, as is Maybe Int. We can make any type created with Maybe an instance of Eq. But notice that the type parameter must be an instance ot Eq, too.
+
+instance (Eq m) => Eq (Maybe m) where  
+   Just x == Just y = x == y  
+   Nothing == Nothing = True  
+   _ == _ = False  
+
+
+-- make distinct types conform to an iterface:            
+class YesNo a where  
+    yesno :: a -> Bool
+instance YesNo Int where  
+    yesno 0 = False  
+    yesno _ = True  
+instance YesNo [a] where  -- [] a concrete type
+    yesno [] = False  
+    yesno _ = True  
+instance YesNo Bool where  
+    yesno = id     
+instance YesNo (Maybe a) where  -- make Maybe a concrete type
+    yesno (Just _) = True  
+    yesno Nothing = False  
+
+-- Functor
+class Functor f where -- f is a type constructor, not a concrete type.  
+    fmap :: (a -> b) -> f a -> f b  
+
+instance Functor Maybe where  -- note that funs match the type in class.  
+    fmap f (Just x) = Just (f x)  
+    fmap f Nothing = Nothing  
+
+ghci> fmap (*2) (Just 88) == Just 176
+ghci> fmap (*2) Nothing == Nothing
+
+instance Functor Tree where -- recursive   
+    fmap f EmptyTree = EmptyTree  
+    fmap f (Node x left right) = Node (f x) (fmap f left) (fmap f right)
+
+data Either good bad = Left good | Right bad 
+instance Functor (Either a) where  -- partially applied type constructor
+    fmap f (Right good) = Right (f good)  
+    fmap f (Left bad) = Left bad -- propogate errors unchanged.
+
+-- Kinds
+ghci> :k Int       -- :: *  Concrete type
+ghci> :k Maybe     -- :: * -> *  Maps one concrete type to another
+ghci> :k Maybe Int -- :: *  Analogous to function application
+
+--  ---  IO  ---
+main = putStrLn "hello, world"
+$ ghc --make helloworld
+
+ghci> :t putStrLn -- String -> IO ()
+
+putStrLn returns an uninteresing (). It is useful because it performs
+an action.
+
+The IO type constructor is a primitive, hidden with newtype. It is a
+Monad and a Functor.
+
+ghci> :t getLine -- IO String
+
+getLine performs an action (accepting input from stdin), and returns a
+string.
+
+Main.hs:
+   |main = do  
+   |    putStrLn "Hello, what's your name?"  
+   |    name <- getLine  -- pull out value and bind to name
+   |    putStrLn ("Hey " ++ name ++ ", you rock!")  
+
+Inside the do construct,
+
+    name <- action
+
+binds the value resulting from performing the action. Without the
+'name <-', the action is still performed, but the value is
+discarded. putStr always returns (), so that value is
+discarded. getLine returns a string and we want to save that.
+
+The do is meant to group a sequence of actions. We can also bind the result of a purely functionaly evaluation as
+
+    let name == factorical(5)
+
+The do construct is a composed of actions (mainly) and the do
+construct itself is an action. It behavior is to run each of its own
+actions in turn. Its value is the value of the last action. That last
+action in a do block cannot be bound.
+
+The 'do' proceedures form a call tree that must decend from main.
+
+'return X' makes an IO value from the expression value X. It is the
+inverse of <-. It has nothing to do with control flow.
+
+sequence is a nice abbrviation:
+
+   |main = do  
+   |    rs <- sequence [getLine, getLine, getLine]  
+   |    print rs  
+ == 
+   |main = do  
+   |    a <- getLine  
+   |    b <- getLine  
+   |    c <- getLine  
+   |    print [a,b,c]  
+
+mapM takes a function and a list, maps the function over the list and
+then sequences it. mapM_ does the same, only it throws away each
+result.
+
+ghci> mapM_ print [1,2,3]  
+1  
+2  
+3  
+-- <Control.Monad>
+
+contents <- getContents :: IO String -- read whole file, lazily.
+
+interact applies a String -> String function to the input file to product the output file.
+
+   |import System.IO  
+   |  
+   |main = do  
+   |    handle <- openFile "girlfriend.txt" ReadMode  
+   |    contents <- hGetContents handle  
+   |    putStr contents  
+   |    hClose handle  
+
+openFile :: String -> IOMode -> IO Handle
+data IOMode = ReadMode | WriteMode | AppendMode | ReadWriteMode
+
+   |import System.IO     
+   |    
+   |main = do     
+   |    withFile "girlfriend.txt" ReadMode (\handle -> do  
+   |        contents <- hGetContents handle     
+   |        putStr contents)  
+
+   |main = do  
+   |    contents <- readFile "girlfriend.txt"  
+   |    putStr contents  
+
+   |main = do     
+   |    contents <- readFile "girlfriend.txt"     
+   |    writeFile "girlfriendcaps.txt" (map toUpper contents)  
+
+hSetBuffering handle $ BlockBuffering (Just 2048)
+
+   |import System.Environment   
+   |import Data.List  
+  
+   |main = do  
+   |   args <- getArgs  
+   |   progName <- getProgName  
+
+ghci> fst (random (mkStdGen 100) :: (Int, StdGen))
+ghci> fst (random (mkStdGen 100) :: (Float, StdGen))
+ghci> take 3 $ randoms (mkStdGen 11) :: [Int]
+
+import Data.ByteString
+pack :: [Word8] -> ByteString
+
+Pure code can throw exceptions, but it they can only be caught in the I/O part of our code
+
+   |import System.Environment  
+   |import System.IO  
+   |import System.IO.Error  
+   |  
+   |main = toTry `catch` handler  
+   |              
+   |toTry :: IO ()  
+   |toTry = do (fileName:_) <- getArgs  
+   |           contents <- readFile fileName  
+   |           putStrLn $ "The file has " ++ show (length (lines contents)) ++ " lines!"  
+   |  
+   |handler :: IOError -> IO ()  
+   |handler e  
+   |    | isDoesNotExistError e = putStrLn "The file doesn't exist!"  
+   |    | otherwise = ioError e  
+
+
+-- Parsec --
+
+ghci> :m +Text.ParserCombinators.Parsec
+
