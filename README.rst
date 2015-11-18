@@ -7,18 +7,18 @@ APIs, but testing is not the purpose of the code. The main goal is to
 have a collection of minimal examples of how each feature of an API is
 used.
 
-Other source of information often prove inadequate.
+Other sources of information often prove inadequate.
 
 * Man pages usually give no examples.
 
-* Tutorials usually provide contrived applications, which is just
-  clutter subject matter.
+* Tutorials usually provide contrived applications, which just
+  clutters subject matter.
 
 * Searching production code bases is can take a lot of time, and the
   code found is entangled with uninteresting code.
 
 * Real test suites need to combat copy-and-paste code, and provide
-  elaborate scheduling and reporting facilities. Compiling with these
+  elaborate scheduling and reporting facilities. Complying with these
   additional requirements makes it hard to see just the code that acts
   with the API.
 
