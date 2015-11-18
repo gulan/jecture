@@ -165,39 +165,66 @@ def struct_01():
     p = pack('d', q)
     assert unpack('d', p)[0] == q
     
-    print_hex(p)
-    print 'struct_01'
+    print 'struct_01 ok'
 
 def struct_02():
-    print 'struct_02'
+    # s - string
+    F = "20s" # 20 is the pad-to char count, which is not encoded.
+    v0 = ("And so it begins ...",)
+    assert len(v0[0]) == 20 # exact size prevents trailing nulls in unpack()
+    p = pack(F, *v0)
+    v1 = unpack(F, p)
+    assert v0 == v1
+    
+    # Declared length longer than actual length.
+    dlen = 21 # declared string len
+    alen = 20 # actual string len
+    F = "%ss" % dlen
+    v0 = ("And so it begins ...",)
+    assert len(v0[0]) == alen
+    p = pack(F, *v0)
+    v1 = unpack(F, p)
+    # The string is padded with nulls on the end to declared length.
+    # There are no extra nulls for alignment
+    padding = '\000' * (dlen - alen)
+    assert v0[0] + padding == v1[0]
+    
+    # Declared length shorter than actual length.
+    dlen = 10 # declared string len
+    alen = 20 # actual string len
+    F = "%ss" % dlen
+    v0 = ("And so it begins ...",)
+    assert len(v0[0]) == alen
+    p = pack(F, *v0)
+    v1 = unpack(F, p)
+    # The string is truncated to declared length.
+    assert v0[0][:dlen] == v1[0]
+    
+    # Declared length of 0 truncates the whole string.
+    dlen = 0 # declared string len
+    alen = 20 # actual string len
+    F = "%ss" % dlen
+    v0 = ("And so it begins ...",)
+    assert len(v0[0]) == alen
+    p = pack(F, *v0)
+    v1 = unpack(F, p)
+    # The string is truncated to declared length (0).
+    assert v1[0] == ''
+    
+    # The default declared length is 1.
+    alen = 20 # actual string len
+    F = "s"
+    v0 = ("And so it begins ...",)
+    assert len(v0[0]) == alen
+    p = pack(F, *v0)
+    v1 = unpack(F, p)
+    # The string is truncated to declared length (1).
+    assert v0[0][:1] == v1[0]
+    
+    print_hex(p)
+    print 'struct_02 ok'
 
 def examples():
-    F = ">I"       # big-endian, unsigned 32 bit integer
-    v0 = (130123,)
-    p = pack(F,*v0)
-    v1 = unpack(F,p)
-    assert v0 == v1
-    
-    F = ">III"
-    v0 = (130123,0,64)
-    p = pack(F,*v0)
-    v1 = unpack(F,p)
-    assert v0 == v1
-    
-    F = ">20s" # 20 is the pad-to char count, which is not encoded.
-    v0 = ("And so it begins ...",)
-    assert len(v0[0]) == 20 # exact size prevents trailing nulls from unpack()
-    p = pack(F,*v0)
-    v1 = unpack(F,p)
-    assert v0 == v1
-    
-    F = ">21s" # 20 is the pad-to char count, which is not encoded.
-    v0 = ("And so it begins ...",)
-    p = pack(F,*v0)
-    assert len(p) == 21 # does NOT round-up to mod 4; no good for XDR.
-    v1 = unpack(F,p)
-    assert v0[0] + '\000' == v1[0]
-    
     F = ">21p" # 21 is the pad-to char count, which IS encoded.
     v0 = ("And so it begins ...",)
     p = pack(F,*v0)
@@ -209,3 +236,4 @@ def examples():
 
 if __name__ == '__main__':
     struct_01()
+    struct_02()
