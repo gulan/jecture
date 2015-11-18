@@ -67,6 +67,104 @@ def struct_01():
     else:
         assert False
 
+    # ? - boolean
+    p = pack('?', 0)
+    assert unpack('?', p)[0] == 0
+
+    p = pack('?', True)
+    assert unpack('?', p)[0] == True
+
+    # H - unsigned short
+    p = pack('H', 0xffff)
+    assert unpack('H', p)[0] == 0xffff
+
+    try:
+        p = pack('H', 0x1ffff)
+    except struct.error:
+        pass  # too big
+    else:
+        assert False
+
+    try:
+        p = pack('H', -1)
+    except struct.error:
+        pass  # cannot be negative
+    else:
+        assert False
+
+    # h - signed short
+    p = pack('h', -1)
+    assert unpack('h', p)[0] == -1
+
+    p = pack('h', 0x7fff)
+    assert unpack('h', p)[0] == 0x7fff
+    
+    try:
+        p = pack('h', 0x8fff)
+    except struct.error:
+        pass  # too big
+    else:
+        assert False
+
+    # i - signed int
+    p = pack('i', -1)
+    assert unpack('i', p)[0] == -1
+
+    p = pack('i', 0x7fffffff)
+    assert unpack('i', p)[0] == 0x7fffffff
+    
+    try:
+        p = pack('i', 0x8fffffff)
+    except struct.error:
+        pass  # too big
+    else:
+        assert False
+
+    # I - unsigned int
+    p = pack('I', 0xffffffff)
+    assert unpack('I', p)[0] == 0xffffffff
+
+    try:
+        p = pack('I', 0x1ffffffff)
+    except struct.error:
+        pass  # too big
+    else:
+        assert False
+
+    try:
+        p = pack('I', -1)
+    except struct.error:
+        pass  # cannot be negative
+    else:
+        assert False
+
+    # L - unsigned long
+    p = pack('L', 0xffffffffffffffff)
+    assert unpack('L', p)[0] == 0xffffffffffffffff
+
+    # l - signed long
+    p = pack('l', 0x7fffffffffffffff)
+    assert unpack('l', p)[0] == 0x7fffffffffffffff
+
+    p = pack('l', -1)
+    assert unpack('l', p)[0] == -1
+
+    # Q - unsigned long long (same as L)
+    p = pack('Q', 0xffffffffffffffff)
+    assert unpack('Q', p)[0] == 0xffffffffffffffff
+
+    # f - float
+    p = pack('f', 1.234)
+    q = unpack('f', p)[0] # Because float conversions are approximate
+    p = pack('f', q)
+    assert unpack('f', p)[0] == q
+
+    # d - double
+    p = pack('d', 1.234)
+    q = unpack('d', p)[0] # Because float conversions are approximate
+    p = pack('d', q)
+    assert unpack('d', p)[0] == q
+    
     print_hex(p)
     print 'struct_01'
 
