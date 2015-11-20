@@ -1,66 +1,66 @@
 #!/usr/bin/env python
 
 import multiprocessing
-import sqlite3 as SQ
+import sqlite3
 import sys
 import time
 
 def test_exceptions():
     try:
-        raise SQ.DatabaseError('err')
-    except SQ.DatabaseError, e:
+        raise sqlite3.DatabaseError('err')
+    except sqlite3.DatabaseError, e:
         assert e.message == 'err'
     
     try:
-        raise SQ.DatabaseError('err',1,'two')
-    except SQ.DatabaseError, e:
+        raise sqlite3.DatabaseError('err',1,'two')
+    except sqlite3.DatabaseError, e:
         assert e.args == ('err',1,'two')
     
     try:
-        raise SQ.Warning('err')
-    except SQ.Warning, e:
+        raise sqlite3.Warning('err')
+    except sqlite3.Warning, e:
         assert e.message == 'err'
         assert e.args == ('err',)
     
     try:
-        raise SQ.Error('err')
-    except SQ.Error, e:
+        raise sqlite3.Error('err')
+    except sqlite3.Error, e:
         assert e.message == 'err'
         assert e.args == ('err',)
     
     try:
-        raise SQ.InterfaceError('err')
-    except SQ.InterfaceError, e:
+        raise sqlite3.InterfaceError('err')
+    except sqlite3.InterfaceError, e:
         assert e.message == 'err'
         assert e.args == ('err',)
     
     try:
-        raise SQ.InternalError('err')
-    except SQ.InternalError, e:
+        raise sqlite3.InternalError('err')
+    except sqlite3.InternalError, e:
         assert e.message == 'err'
         assert e.args == ('err',)
     
     try:
-        raise SQ.OperationalError('err')
-    except SQ.OperationalError, e:
+        raise sqlite3.OperationalError('err')
+    except sqlite3.OperationalError, e:
         assert e.message == 'err'
         assert e.args == ('err',)
     
     try:
-        raise SQ.ProgrammingError('err')
-    except SQ.ProgrammingError, e:
+        raise sqlite3.ProgrammingError('err')
+    except sqlite3.ProgrammingError, e:
         assert e.message == 'err'
         assert e.args == ('err',)
     
     try:
-        raise SQ.IntegrityError('err')
-    except SQ.IntegrityError, e:
+        raise sqlite3.IntegrityError('err')
+    except sqlite3.IntegrityError, e:
         assert e.message == 'err'
         assert e.args == ('err',)
     
     try:
-        raise SQ.DataError('err')
-    except SQ.DataError, e:
+        raise sqlite3.DataError('err')
+    except sqlite3.DataError, e:
         assert e.message == 'err'
         assert e.args == ('err',)
         
@@ -90,69 +90,69 @@ def test_connect():
     total_changes
     """
     
-    print 'case 1'
+    # print 'case 1'
     # These number-strings are in the form 12.34.56
-    print >>sys.stderr, 'sqlite3.version=%s' % SQ.version
-    print >>sys.stderr, 'sqlite3.sqlite_version=%s' % SQ.sqlite_version
+    # print >>sys.stderr, 'sqlite3.version=%s' % sqlite3.version
+    # print >>sys.stderr, 'sqlite3.sqlite_version=%s' % sqlite3.sqlite_version
     # Same data split-out into integer tuples:
-    assert '.'.join(str(i) for i in SQ.version_info) == SQ.version
-    assert ('.'.join(str(i) for i in SQ.sqlite_version_info)
-            == SQ.sqlite_version)
+    assert '.'.join(str(i) for i in sqlite3.version_info) == sqlite3.version
+    assert ('.'.join(str(i) for i in sqlite3.sqlite_version_info)
+            == sqlite3.sqlite_version)
     
-    print 'case 2'
-    cn = SQ.connect(':memory:')
+    # print 'case 2'
+    cn = sqlite3.connect(':memory:')
     assert cn.isolation_level == ''
     assert cn.total_changes == 0
     cn.close()
     
-    print 'case 3'
-    cn = SQ.connect(':memory:',isolation_level='DEFERRED')
+    # print 'case 3'
+    cn = sqlite3.connect(':memory:',isolation_level='DEFERRED')
     assert cn.isolation_level == 'DEFERRED'
     cn.close()
 
-    print 'case 4'
-    cn = SQ.connect(':memory:',isolation_level='IMMEDIATE')
+    # print 'case 4'
+    cn = sqlite3.connect(':memory:',isolation_level='IMMEDIATE')
     assert cn.isolation_level == 'IMMEDIATE'
     # print list(cn.iterdump())
     cn.close()
 
-    print 'case 5'
-    cn = SQ.connect(':memory:',isolation_level='EXCLUSIVE')
+    # print 'case 5'
+    cn = sqlite3.connect(':memory:',isolation_level='EXCLUSIVE')
     assert cn.isolation_level == 'EXCLUSIVE'
     # print list(cn.iterdump())
     cn.close()
 
-    print 'case 6'
+    # print 'case 6'
     # Do not use a connection object after it has been closed
-    cn = SQ.connect(':memory:')
+    cn = sqlite3.connect(':memory:')
     cn.close()
     try:
         cn.total_changes
-    except SQ.ProgrammingError, e:
+    except sqlite3.ProgrammingError, e:
         pass
     else:
         assert 0
         
-    print 'case 7'
-    cn = SQ.connect(':memory:')
+    # print 'case 7'
+    cn = sqlite3.connect(':memory:')
     cn.commit()
     assert cn.total_changes == 0
     cn.close()
     
-    print 'case 8'
-    cn = SQ.connect(':memory:')
+    # print 'case 8'
+    cn = sqlite3.connect(':memory:')
     assert cn.commit() == None
     assert cn.close() == None
     
-    print 'case 9'
-    cn = SQ.connect(':memory:')
+    # print 'case 9'
+    cn = sqlite3.connect(':memory:')
     c = cn.cursor()
     cn.commit()
     assert cn.total_changes == 0
     cn.close()
     
-    print 'case 10'
-    cn = SQ.connect(':memory:')
+    # print 'case 10'
+    cn = sqlite3.connect(':memory:')
     c = cn.cursor()
     c.execute('create table ta(a integer not null)')
     assert cn.total_changes == 0
@@ -160,8 +160,8 @@ def test_connect():
     assert cn.total_changes == 0
     cn.close()
 
-    print 'case 11'
-    cn = SQ.connect(':memory:')
+    # print 'case 11'
+    cn = sqlite3.connect(':memory:')
     c = cn.cursor()
     c.execute('create table ta(a integer not null)')
     c.execute('insert into ta values (17)')
@@ -170,8 +170,8 @@ def test_connect():
     assert cn.total_changes == 1
     cn.close()
 
-    print 'case 12'
-    cn = SQ.connect(':memory:')
+    # print 'case 12'
+    cn = sqlite3.connect(':memory:')
     c = cn.cursor()
     c.execute('create table ta(a integer not null)')
     c.execute('insert into ta values (17)')
@@ -182,12 +182,12 @@ def test_connect():
     cn.close()
     print 'test_connect ok'
 
-def test_11():
+def sqlite_11():
     """
     There is no explict commit. This will create a persistent table,
     but the inserts are never committed.
     """
-    cx = SQ.connect('counters.db')
+    cx = sqlite3.connect('counters.db')
     c = cx.cursor()
     c.execute('drop table if exists test_11;')
     c.execute('create table test_11 (value integer);')
@@ -195,14 +195,14 @@ def test_11():
     c.execute('select value from test_11')
     assert c.fetchone()[0] == 1
     cx.close()
-    print 'test_11 ok'
+    print 'sqlite_11 ok'
 
-def test_12():
+def sqlite_12():
     """
     Create a new table, and commit a value. On a fresh connection,
     verify that the value persists.
     """
-    cx = SQ.connect('counters.db')
+    cx = sqlite3.connect('counters.db')
     c = cx.cursor()
     c.execute('drop table if exists test_12;')
     c.execute('create table test_12 (value integer);')
@@ -212,20 +212,20 @@ def test_12():
     cx.commit()
     cx.close()
     
-    cx = SQ.connect('counters.db')
+    cx = sqlite3.connect('counters.db')
     c = cx.cursor()
     c.execute('select value from test_12')
     assert c.fetchone()[0] == 1
     cx.close()
-    print 'test_12 ok'
+    print 'sqlite_12 ok'
 
-def test_13():
+def sqlite_13():
     """
     1. Create a new table, and commit a value.
     2. On a new connection, increment the value and commit.
     3. On another new connection, verify the increment persists.
     """
-    cx = SQ.connect('counters.db')
+    cx = sqlite3.connect('counters.db')
     c = cx.cursor()
     c.execute('drop table if exists test_13;')
     c.execute('create table test_13 (value integer);')
@@ -233,20 +233,20 @@ def test_13():
     cx.commit()
     cx.close()
     
-    cx = SQ.connect('counters.db')
+    cx = sqlite3.connect('counters.db')
     c = cx.cursor()
     c.execute('update test_13 set value = (select value from test_13) + 1;')
     cx.commit()
     cx.close()
     
-    cx = SQ.connect('counters.db')
+    cx = sqlite3.connect('counters.db')
     c = cx.cursor()
     c.execute('select value from test_13;')
     assert c.fetchone()[0] == 2
     cx.close()
-    print 'test_13 ok'
+    print 'sqlite_13 ok'
 
-def test_14():
+def sqlite_14():
     """
     In process A,
       1. Create a new table, and commit a value.
@@ -257,8 +257,8 @@ def test_14():
     """
 
     def A(pipe):
-        print "A 1"
-        cx = SQ.connect('counters.db')
+        # print "A 1"
+        cx = sqlite3.connect('counters.db')
         c = cx.cursor()
         c.execute('drop table if exists test_14;')
         c.execute('create table test_14 (value integer);')
@@ -266,37 +266,37 @@ def test_14():
         cx.commit()
         cx.close()
         pipe.send(''); pipe.recv() # sync point
-        print "A 2"
+        # print "A 2"
         pipe.close()
-        print "A 3"
+        # print "A 3"
 
     def B(pipe):
-        print "B 1"
+        # print "B 1"
         pipe.recv(); pipe.send('') # sync point
-        print "B 2"
-        cx = SQ.connect('counters.db')
+        # print "B 2"
+        cx = sqlite3.connect('counters.db')
         c = cx.cursor()
         c.execute('select value from test_14;')
         assert c.fetchone()[0] == 1
         cx.close()
         pipe.close()
-        print "B 3"
+        # print "B 3"
         
-    print "M 1"
+    # print "M 1"
     p1, p2 = multiprocessing.Pipe()
     procA = multiprocessing.Process(target=A, args=(p1,))
     procA.start()
-    print "M 2"
+    # print "M 2"
     procB = multiprocessing.Process(target=B, args=(p2,))
     procB.start()
-    print "M 3"
+    # print "M 3"
     
     procA.join()
-    print "M 4"
+    # print "M 4"
     procB.join()
-    print 'test_14 ok'
+    print 'sqlite_14 ok'
 
-# def test_15(): FAIL. sqlite3 module has limitations. Switching to apsw.
+# def sqlite_15(): FAIL. sqlite3 module has limitations. Switching to apsw.
 #     """
 #     In process Main,
 #       1. Create a new table, and commit a value.
@@ -311,7 +311,7 @@ def test_14():
     
 #     def AB(pid):
 #         for _ in range(10):
-#             cx = SQ.connect('counters.db')
+#             cx = sqlite3.connect('counters.db')
 #             # isolation_level = 'IMMEDIATE')
 #             isolation_level = None
 #             c = cx.cursor()
@@ -324,14 +324,14 @@ def test_14():
 #                 c.execute('insert into test_15 (value) values (?);', (value,))
 #                 c.execute('commit;')
 #                 print 'value %s commmited by process %s' % (value, pid)
-#             except SQ.OperationalError:
+#             except sqlite3.OperationalError:
 #                 # c.execute('rollback;')
 #                 print 'process %s abandoned %s' % (pid, value)
 #             # cx.commit()
 #             cx.close()
 
 #     print "M 1"
-#     cx = SQ.connect('counters.db')
+#     cx = sqlite3.connect('counters.db')
 #     c = cx.cursor()
 #     c.execute('drop table if exists test_15;')
 #     c.execute('create table test_15 (seq integer primary key autoincrement, value integer);')
@@ -349,15 +349,15 @@ def test_14():
 #     procA.join()
 #     print "M 4"
 #     procB.join()
-#     print 'test_15 ok'
+#     print 'sqlite_15 ok'
 
 if __name__ == '__main__':
     test_exceptions()
     test_connect()
-    test_11()
-    test_12()
-    test_13()
-    test_14()
+    sqlite_11()
+    sqlite_12()
+    sqlite_13()
+    sqlite_14()
 
 # arraysize
 # close

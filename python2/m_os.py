@@ -337,7 +337,6 @@ def os_08():
     # Note: os.environ is an dict-like instance of _Environ.
     os.environ['USER'] == 'gulan'
     os.environ['LOGNAME'] == 'gulan'
-
     print 'os_08 ok'
 
 def os_09():
@@ -553,7 +552,6 @@ def os_19():
     assert len(data) == len(rec) + N
     assert data[:N] == '\000' * N
     assert data[N:] == rec
-    
     print 'os_19 ok'
 
 def os_20(): print 'os_20 ok'

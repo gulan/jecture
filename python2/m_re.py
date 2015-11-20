@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import re
 import sys
 
@@ -43,7 +45,7 @@ def report(p,s,b=0):
     print 'span', m.span()
     print 'start', m.start()
 
-def t01():
+def re_01():
     p = re.compile(r'abc')
     s = 'abcdefghi'
     m = p.match(s)
@@ -57,8 +59,9 @@ def t01():
     assert m.lastindex == None
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_01'
 
-def t02():
+def re_02():
     p = re.compile(r'...')
     s = 'abcdefghi'
     m = p.match(s)
@@ -72,8 +75,9 @@ def t02():
     assert m.lastindex == None
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_02'
 
-def t03():
+def re_03():
     p = re.compile(r'...')
     s = 'abcdefghi'
     m = p.match(s,4)  # start offset
@@ -87,8 +91,9 @@ def t03():
     assert m.lastindex == None
     assert m.pos == 4 and m.endpos == len(s)
     assert m.span() == (4, 7)
+    print 're_03'
 
-def t04():
+def re_04():
     """Explictly match the start"""
     p = re.compile(r'^...')
     s = 'abcdefghi'
@@ -103,8 +108,9 @@ def t04():
     assert m.lastindex == None
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_04'
 
-def t05():
+def re_05():
     """Group"""
     p = re.compile(r'(...)')
     s = 'abcdefghi'
@@ -119,8 +125,9 @@ def t05():
     assert m.lastindex == 1
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_05'
 
-def t06():
+def re_06():
     """Nested group"""
     p = re.compile(r'(.(.).)')
     s = 'abcdefghi'
@@ -135,8 +142,9 @@ def t06():
     assert m.lastindex == 1
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_06'
 
-def t07():
+def re_07():
     """Two groups"""
     p = re.compile(r'(.).(.)')
     s = 'abcdefghi'
@@ -151,8 +159,9 @@ def t07():
     assert m.lastindex == 2
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_07'
 
-def t08():
+def re_08():
     """Non-capturing group"""
     p = re.compile(r'(?:.).(.)')
     s = 'abcdefghi'
@@ -167,8 +176,9 @@ def t08():
     assert m.lastindex == 1
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_08'
 
-def t09():
+def re_09():
     """Named groups groups"""
     p = re.compile(r'(?P<first>.).(?P<second>.)')
     s = 'abcdefghi'
@@ -183,8 +193,9 @@ def t09():
     assert m.lastindex == 2
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_09'
 
-def t10():
+def re_10():
     p = re.compile(r'.(?# this comment should be ignored)..')
     s = 'abcdefghi'
     m = p.match(s)
@@ -198,8 +209,9 @@ def t10():
     assert m.lastindex == None
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_10'
 
-def t11():
+def re_11():
     """Choice"""
     p = re.compile(r'(a|z)..')
     s = 'abcdefghi'
@@ -214,8 +226,9 @@ def t11():
     assert m.lastindex == 1
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_11'
 
-def t12():
+def re_12():
     """Choice"""
     p = re.compile(r'(a|x)(a|b)(b|c)')
     s = 'abcdefghi'
@@ -230,8 +243,9 @@ def t12():
     assert m.lastindex == 3
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 3)
+    print 're_12'
 
-def t13():
+def re_13():
     """0 or more"""
     p = re.compile(r'.*')
     s = 'abcdefghi'
@@ -246,8 +260,9 @@ def t13():
     assert m.lastindex == None
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 9)
+    print 're_13'
 
-def t14():
+def re_14():
     """1 or more"""
     p = re.compile(r'.+')
     s = 'abcdefghi'
@@ -262,22 +277,23 @@ def t14():
     assert m.lastindex == None
     assert m.pos == 0 and m.endpos == len(s)
     assert m.span() == (0, 9)
+    print 're_14'
 
 
 if __name__ == '__main__':
-    t01()
-    t02()
-    t03()
-    t04()
-    t05()
-    t06()
-    t07()
-    t08()
-    t09()
-    t10()
-    t11()
-    t12()
-    t13()
-    t14()
+    re_01()
+    re_02()
+    re_03()
+    re_04()
+    re_05()
+    re_06()
+    re_07()
+    re_08()
+    re_09()
+    re_10()
+    re_11()
+    re_12()
+    re_13()
+    re_14()
     print 'ok'
 
