@@ -1,0 +1,58 @@
+cabal update
+
+mkdir exhibit-start
+cd exhibit-start
+mkdir src
+
+cabal init \
+      --non-interactive \
+      --license=BSD3 \
+      --is-executable \
+      --language=Haskell2010 \
+      --homepage=gulan.github.io \
+      --author='Glen Wilder' \
+      --category=Data \
+      --synopsis='Show how' \
+      --package-name=exhibit-start \
+      --source-dir=src
+
+# undo: rm exhibit-start.cabal LICENSE Setup.hs
+
+# edit exhibit-start.cabal to make these changes:
+   | 7c7
+   | < -- description:         
+   | ---
+   | > description:         Show how to start a basic Haskell project
+   | 13c13
+   | < -- copyright:           
+   | ---
+   | > copyright:           2015, Glen Wilder
+   | 16d15
+   | < -- extra-source-files:  
+   | 19a19
+   | >   ghc-options:         -Wall
+   | 21,22d20
+   | <   -- other-modules:       
+   | <   -- other-extensions:
+
+# me only: cp ../my_exhibit-start.cabal exhibit-start.cabal
+
+printf "module Main where\n\nmain :: IO ()\nmain = putStrLn \"hello\"\n" >src/Main.hs
+
+cabal sandbox init
+cabal install --only-dependencies
+
+# undo: rm cabal.sandbox.config; rm -rf .cabal-sandbox
+
+cabal build                               # method 1
+./dist/build/exhibit-start/exhibit-start
+
+cabal run                                 # method 2
+
+cabal repl                                # method 3
+   | *Main> main
+   | hello
+   | ^d
+
+# undo build: rm -rf dist/
+# undo all: cd ../ ; rm -rf exhibit-start/
